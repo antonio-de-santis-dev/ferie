@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<definitions
+        xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:flowable="http://flowable.org/bpmn"
+        targetNamespace="http://www.flowable.org/processdef">
+
+    <process
+    id="richiesta-ferie"
+    name="Richiesta Ferie"
+    isExecutable="true"
+    >
+        <startEvent
+            id="start"
+            name="Richiesta Invita"/>
+
+        <serviceTask
+            id="registraRichiesta"
+            name="Registra Richiesta"
+            flowable:class="com.example.ferie.delegate.RegistraRichiestaDelegate"/>
+
+        <userTask
+                id="approvaRichiesta"
+                name="Approva Richiesta"
+                flowable:assignee="manager"/>
+
+        <exclusiveGateway
+            id="gatewayDecisione"
+            name="Decisionne"/>
+
+        <serviceTask
+            id="inviaApprovazione"
+            name="Invia Approvazione"
+            flowable:class="com.example.ferie.delegate.InviaApprovazioneDelegate"/>
+
+        <serviceTask
+            id="notificaRifiuto"
+            name="Notifica Rifiuto"
+            flowable:class="com.example.ferie.delegate.InviaApprovazioneDelegate"/>
+
+        <endEvent
+            id="endOk"
+            name="Fine OK"/>
+
+        <endEvent
+            id="endKo"
+            name="Fine KO"/>
+
+        <sequenceFlow id="f1" sourceRef="start" targetRef="registraRichiesta"/>
+        <sequenceFlow id="f2" sourceRef="registraRichiesta" targetRef="approvaRichiesta"/>
+        <sequenceFlow id="f3" sourceRef="approvaRichiesta" targetRef="gatewayDecisione"/>
+
+
+        <sequenceFlow id="fSi"  sourceRef="gatewayDecisione" targetRef="inviaApprovazione">
+            <conditionExpression
+                    xsi:type="tFormalExpression"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                
+            </conditionExpression>
+        </sequenceFlow>
+        
+        <sequenceFlow id="fNo" sourceRef="gatewayDecisione" targetRef="notificaRifiuto">
+            <conditionExpression>${decisione == 'RIFIUTATO'}</conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow id="f4" sourceRef="inviaApprovazione" targetRef="endOk"/>
+        <sequenceFlow id="f5" sourceRef="notificaRifiuto" targetRef="endKo"/>
+
+    </process>
+
+</definitions>
