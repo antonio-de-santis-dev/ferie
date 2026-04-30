@@ -22,6 +22,7 @@ public class FerieController {
     @Autowired
     private   TaskService taskService;
 
+    private RichiestaFerieDTO Rdto;
 
 
     @PutMapping("/richiesta") //invio richiesta ferie
@@ -52,6 +53,7 @@ public class FerieController {
 
         var tasks = taskService.createTaskQuery()
                 .taskAssignee("manager")
+                .includeProcessVariables()
                 .list();
 
         var risposta = tasks.stream().map(t ->{
@@ -60,6 +62,9 @@ public class FerieController {
             m.put("nome",               t.getName());
             m.put("percorsoInstanceId", t.getProcessInstanceId());
             m.put("dataCreazione",      t.getCreateTime());
+            Map<String, Object> variabili = t.getProcessVariables();
+            m.put("nomeDipendente", variabili.get("nomeDipendente"));
+            m.put("Data", variabili.get("dataInizio") + " | " + variabili.get("dataFine"));
             return m;
         }).toList();
 
